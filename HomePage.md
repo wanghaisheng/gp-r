@@ -46,9 +46,10 @@ In a traditional analytics workflow using R, data are loaded from a data source,
 The Pivotal Greenplum database (GPDB) and PivotalHD w/ HAWQ offers several alternatives to interact with R using the in-database/in-Hadoop analytics paradigm. There are many ways to use R with the Pivotal platform. In this guide, we will outline the most common practices and provide code examples to help get you started.
 
 Official documentation can be found here:
-* [GPDB Product Page](https://support.emc.com/products/13148_Greenplum-Database/Topics/pg42716/)
-* [GPDB Installation guide](https://support.emc.com/docu36090_Greenplum-Database-4.2-Installation-Guide.pdf)
-* [GPDB Administrator guide](https://support.emc.com/docu36089_Greenplum-Database-4.2-Administrator-Guide.pdf?language=en_US)
+* [GPDB Product Page](http://www.pivotal.io/big-data/pivotal-greenplum-database)
+* [GPDB Documentation](http://gpdb.docs.pivotal.io/index.html)
+* [GPDB Installation guide](http://gpdb.docs.pivotal.io/4320/pdf/GPDB43InstallGuide.pdf)
+* [GPDB Administrator guide](http://gpdb.docs.pivotal.io/4320/pdf/GPDB43AdminGuide.pdf)
 
 This documentation is intended as a guide for **practitioners** and **should not** be considered official documentation. The intention is to give pragmatic tips on how to use the Greenplum Database with the R statistical programming environment.  
 
@@ -574,6 +575,66 @@ Here is the PL/R function which demonstrate parallel scoring using the GLM model
 
 
 	     #Read the test set from the previously created table  
+	     test_set <- data.frame(
+					age = age,
+					gender = gender,
+					race = race,
+					marital_status = marital_status, 
+					bmi =  bmi,
+					med_cond1 =  med_cond1,
+					med_cond2 =  med_cond2,
+					med_cond3 =  med_cond3,
+					med_cond4 =  med_cond4,
+					med_cond5 =  med_cond5,
+					med_cond6 =  med_cond6,
+					med_cond7 =  med_cond7  	
+			            );
+	     #Perform prediction
+	     pred <- predict(gp_plr_mdl_score, newdata=test_set, type="response"); 
+
+	     return (pred)
+	$$
+	LANGUAGE 'plr';
+
+```
+
+You can also score a whole array:
+```SQL
+	DROP FUNCTION IF EXISTS gpdemo.mdl_score_demo( bytea, 
+							integer[],
+							text[],
+							text[],
+							text[],
+							double precision[],
+							integer[],
+							integer[],
+							integer[],
+							integer[],
+							integer[],
+							integer[],
+							integer[] 
+						      );
+	CREATE FUNCTION gpdemo.mdl_score_demo( mdl bytea, 
+						age integer[],
+						gender text[],
+						race text[],
+						marital_status text[],
+						bmi double precision[],
+						med_cond1 integer[],
+						med_cond2 integer[],
+						med_cond3 integer[],
+						med_cond4 integer[],
+						med_cond5 integer[],
+						med_cond6 integer[],
+						med_cond7 integer[] 
+					      ) 
+	RETURNS numeric[]
+    IMMUTABLE
+    AS
+	$$
+	    gp_plr_mdl_score <- unserialize(mdl)
+
+#Read the test set from the previously created table
 	     test_set <- data.frame(
 					age = age,
 					gender = gender,
@@ -1133,7 +1194,7 @@ Key features include the following:
 
 ## <a name="pivotalr_demo"/> Demo
 
-We have put together a [video demo](https://docs.google.com/file/d/0B9bfZ-YiuzxQc1RWTEJJZ2V1TWc/edit?usp=sharing) of the debut release of PivotalR.  We also provide the [deck](https://github.com/wjjung317/gp-r/blob/master/docs/PivotalR_Demo.pptx), [code](https://github.com/wjjung317/gp-r/blob/master/src/R/PivotalR_Demo.R), and [data](https://docs.google.com/file/d/0B9bfZ-YiuzxQRXVNU09kQTlQaDA/edit?usp=sharing) used in the demo. Note that the demo intends to highlight a selection of functionality in PivotalR - we encourage you to check out the [documentation](http://cran.r-project.org/web/packages/PivotalR/PivotalR.pdf) to explore more of its features.  
+We have put together a [video demo](http://www.youtube.com/watch?v=6cmyRCMY6j0) of the debut release of PivotalR.  We also provide the [deck](https://github.com/wjjung317/gp-r/blob/master/docs/PivotalR_Demo.pptx), [code](https://github.com/wjjung317/gp-r/blob/master/src/R/PivotalR_Demo.R), and [data](https://drive.google.com/file/d/0B76GEdSVCa8NUlZhQnFBaGgyTk0/view?usp=sharing) used in the demo. Note that the demo intends to highlight a selection of functionality in PivotalR - we encourage you to check out the [documentation](http://cran.r-project.org/web/packages/PivotalR/PivotalR.pdf) to explore more of its features.  
 
 ## <a name="pivotalr_install"/> Download & Installation
 
@@ -1141,5 +1202,4 @@ PivotalR is available for download and installation from [CRAN](http://cran.r-pr
 
 
 # Authors and Contributors
-This document is a project by Woo Jung (@wjjung317), Srivatsan 'Vatsan' Ramanujam (@vatsan) and Noah Zimmerman (@zimmeee)
-and Alex Kagoshima (@alexkago).
+This document is a project by Woo Jung (@wjjung317), Srivatsan 'Vatsan' Ramanujam (@vatsan) and Noah Zimmerman (@zimmeee), Alex Kagoshima (@alexkago) and Ronert Obst (@ronert).
